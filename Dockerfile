@@ -1,29 +1,22 @@
-FROM ubuntu
+FROM java:8-jre
 MAINTAINER Rob Layton hire@roblayton.com
 
 # Update APT
 RUN apt-get update
 
 # Install build dependencies
-RUN apt-get install -y \
-  wget \
-  python-software-properties \
-  software-properties-common
+RUN apt-get install -y wget
 
 # Fetch oracle java ppa and elasticsearch public signing key
 RUN \
-  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  wget -O - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | sudo apt-key add - && \
-  echo 'deb http://packages.elasticsearch.org/elasticsearch/1.4/debian stable main' | sudo tee /etc/apt/sources.list.d/elasticsearch.list
+  #add-apt-repository -y ppa:webupd8team/java && \
+  wget -O - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key add - && \
+  echo 'deb http://packages.elasticsearch.org/elasticsearch/1.4/debian stable main' | tee /etc/apt/sources.list.d/elasticsearch.list
 
-# Define commonly used JAVA_HOME variable
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
-
-# Install java8, elasticsearch, nginx, supervisor
+# Install elasticsearch, nginx, supervisor
 RUN \
   apt-get update && \
-  apt-get -y install oracle-java8-installer elasticsearch=1.4.2 nginx supervisor
+  apt-get -y install elasticsearch=1.4.2 nginx supervisor
 
 # Nginx and elasticsearch reverse proxy
 ADD nginx/sites-available/elasticsearch /etc/nginx/sites-available/
@@ -42,7 +35,7 @@ ADD supervisor/elasticsearch.conf /etc/supervisor/conf.d/
 ADD config/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
 
 # Clean up APT and temporary files when done
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/oracle-jdk8-installer
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Define default command.
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf", "-n"]

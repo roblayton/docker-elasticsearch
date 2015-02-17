@@ -7,9 +7,8 @@ RUN apt-get update
 # Install build dependencies
 RUN apt-get install -y wget
 
-# Fetch oracle java ppa and elasticsearch public signing key
+# Fetch elasticsearch public signing key
 RUN \
-  #add-apt-repository -y ppa:webupd8team/java && \
   wget -O - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key add - && \
   echo 'deb http://packages.elasticsearch.org/elasticsearch/1.4/debian stable main' | tee /etc/apt/sources.list.d/elasticsearch.list
 

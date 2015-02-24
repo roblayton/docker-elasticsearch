@@ -1,4 +1,4 @@
 bootstrap.mlockall: true
 http.cors.allow-credentials: true
 http.cors.enabled: true
-http.cors.allow-origin: http://graphs.codeboxsystems.com
+#http.cors.allow-origin: http://graphs.codeboxsystems.com

@@ -12,10 +12,10 @@ RUN \
   wget -O - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key add - && \
   echo 'deb http://packages.elasticsearch.org/elasticsearch/1.4/debian stable main' | tee /etc/apt/sources.list.d/elasticsearch.list
 
-# Install elasticsearch, nginx, supervisor
+# Install elasticsearch, nginx
 RUN \
   apt-get update && \
-  apt-get -y install elasticsearch=1.4.2 nginx supervisor
+  apt-get -y install elasticsearch=1.4.2 nginx
 
 # Nginx and elasticsearch reverse proxy
 ADD nginx/sites-available/elasticsearch /etc/nginx/sites-available/
@@ -28,16 +28,17 @@ RUN \
 RUN echo "daemon off;\n" >> /etc/nginx/nginx.conf &&\
   sed -i '/^worker_processes/s,[0-9]\+,'"auto"',' /etc/nginx/nginx.conf
 
-# Mount supervisor and elasticsearch config files
-ADD supervisor/nginx.conf /etc/supervisor/conf.d/
-ADD supervisor/elasticsearch.conf /etc/supervisor/conf.d/
+# Mount elasticsearch config files
 ADD config/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+
+ADD run.sh /usr/local/bin/run
+RUN chmod +x /usr/local/bin/run
 
 # Clean up APT and temporary files when done
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Define default command.
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf", "-n"]
+CMD ["/usr/local/bin/run"]
 
 # Expose ports.
 #   - 9200: HTTP
